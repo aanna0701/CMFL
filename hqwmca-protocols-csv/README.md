@@ -1,0 +1,1 @@
+> Here are the CSV files with the protocols in HQ-WMCA dataset. The files with `LOO` are the leave one out protocols  and each column in the CSV are as follows:> > filepath+'-trial id', groundtruth(0-bonafide,1-attack),attacktype, fold (train/dev/eval)

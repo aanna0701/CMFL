@@ -1,0 +1,10 @@
+setuptools
+numpy
+bob.core
+bob.extension
+bob.ip.base
+bob.ip.color
+bob.io.image
+bob.pad.base
+bob.pad.face
+bob.learn.pytorch

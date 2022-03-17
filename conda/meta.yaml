@@ -1,0 +1,86 @@
+{% set name = 'bob.paper.cross_modal_focal_loss_cvpr2021' %}
+{% set project_dir = environ.get('RECIPE_DIR') + '/..' %}
+
+package:
+  name: {{ name }}
+  version: {{ environ.get('BOB_PACKAGE_VERSION', '0.0.1') }}
+
+build:
+  skip: true  # [not linux]
+  number: {{ environ.get('BOB_BUILD_NUMBER', 0) }}
+  run_exports:
+    - {{ pin_subpackage(name) }}
+  script:
+    - cd {{ project_dir }}
+    {% if environ.get('BUILD_EGG') %}
+    - python setup.py sdist --formats=zip
+    {% endif %}
+    - python setup.py install --single-version-externally-managed --record record.txt
+    # installs the documentation source, readme to share/doc so it is available
+    # during test time
+    - install -d "${PREFIX}/share/doc/{{ name }}"
+    - cp -R README.rst requirements.txt doc "${PREFIX}/share/doc/{{ name }}/"
+
+requirements:
+  # place your build dependencies before the 'host' section
+  host:
+    - python {{ python }}
+    - setuptools {{ setuptools }}
+    - bob.core
+    - bob.extension
+    - bob.ip.base
+    - bob.ip.color
+    - bob.io.image
+    - bob.pad.base
+    - bob.pad.face
+    - bob.db.hqwmca
+    - bob.learn.pytorch  # [linux]
+    - future
+    - matplotlib {{ matplotlib }}
+    - numpy {{ numpy }}
+    - opencv {{ opencv }}
+    - pytorch {{ pytorch }}  # [linux]
+    - torchvision {{ torchvision }}  # [linux]
+    - h5py {{ h5py }}
+    - scikit-learn {{ scikit_learn }}
+
+    # place your other host dependencies here
+  run:
+    - {{ pin_compatible('python') }}
+    - {{ pin_compatible('setuptools') }}
+    - {{ pin_compatible('numpy') }}
+    - {{ pin_compatible('matplotlib') }}
+    - {{ pin_compatible('opencv') }}
+    - {{ pin_compatible('pytorch') }}  # [linux]
+    - {{ pin_compatible('torchvision') }}  # [linux]
+    - {{ pin_compatible('h5py') }}
+    - {{ pin_compatible('scikit-learn') }}
+    - future
+
+    # place other runtime dependencies here (same as requirements.txt)
+
+test:
+  imports:
+    - {{ name }}
+  commands:
+    # test commands ("script" entry-points) from your package here
+    - nosetests --with-coverage --cover-package={{ name }} -sv {{ name }}
+    - sphinx-build -aEW {{ project_dir }}/doc {{ project_dir }}/sphinx
+    - sphinx-build -aEb doctest {{ project_dir }}/doc sphinx
+    - conda inspect linkages -p $PREFIX {{ name }}  # [not win]
+    - conda inspect objects -p $PREFIX {{ name }}  # [osx]
+  requires:
+    - bob-devel {{ bob_devel }}.*
+    - nose
+    - coverage
+    - sphinx
+    - sphinx_rtd_theme
+    - gridtk
+    # extend this list with further test-time-only dependencies
+
+about:
+  summary: Source code package for CVPR 2021 paper
+  home: https://www.idiap.ch/software/bob/
+  license: GNU General Public License v3 (GPLv3)
+  license_family: GPL
+  license_file: ../COPYING
